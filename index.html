@@ -1,0 +1,469 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090f1e">
+<title>مرکز تحقیقات هوش مصنوعی | AI Research Lab</title>
+<style>
+:root{
+  --bg:#080d19;--panel:#111a2c;--panel2:#18243a;--line:#293650;
+  --text:#eef4ff;--muted:#9aabc6;--blue:#6ea8fe;--green:#5ee0ad;
+  --yellow:#ffd166;--red:#ff7787;--radius:16px
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Tahoma,Arial,sans-serif}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.app{min-height:100dvh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:#0d1525;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#507bff,#9c72ff);font-size:23px}
+h1{font-size:16px;margin:0 0 5px}
+.subtitle{font-size:11px;color:var(--muted)}
+.status{font-size:11px;color:var(--green);white-space:nowrap}
+.layout{display:grid;grid-template-columns:255px minmax(0,1fr);gap:12px;padding:12px;flex:1;min-height:0}
+.sidebar,.mainpanel{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.sidebar{padding:13px;display:flex;flex-direction:column;gap:12px}
+.section-title{font-size:12px;color:var(--muted);margin:4px 0 8px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}
+.stat b{display:block;font-size:22px;margin-bottom:5px}
+.stat span{font-size:11px;color:var(--muted)}
+.progress{height:6px;background:#26344d;border-radius:20px;overflow:hidden;margin-top:10px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5a8cff,#5ee0ad);transition:width .3s}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.nav button,.secondary,.action{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:12px}
+.nav button.active,.action{background:#27447a;border-color:#3c68b8}
+.agent-list{display:flex;flex-direction:column;gap:6px;overflow:auto;max-height:330px}
+.agent{display:flex;align-items:center;gap:9px;text-align:right;background:#131f33;color:var(--text);border:1px solid transparent;border-radius:11px;padding:8px;width:100%}
+.agent.selected{border-color:var(--blue);background:#1b2b46}
+.avatar{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#293d61;font-size:18px;flex-shrink:0}
+.agent-info{min-width:0;flex:1}
+.agent-info b{display:block;font-size:11px;margin-bottom:4px}
+.agent-info small{display:block;font-size:10px;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+.mainpanel{display:flex;flex-direction:column}
+.toolbar{padding:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+.toolbar strong{font-size:13px;margin-left:auto}
+.toolbar button{padding:8px 11px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);color:var(--text);font-size:11px}
+.toolbar button.active{background:#294b80}
+#world{position:relative;flex:1;min-height:410px;background:radial-gradient(ellipse at center,#192d4d,#080d19 75%);overflow:hidden}
+#scene{width:100%;height:100%;display:block;touch-action:none}
+.hint{position:absolute;top:12px;right:12px;max-width:230px;padding:9px 11px;background:#0b1324dd;border:1px solid var(--line);border-radius:10px;font-size:10px;color:#d2def2;pointer-events:none}
+.world-bottom{position:absolute;bottom:12px;right:12px;left:12px;display:flex;justify-content:space-between;align-items:end;gap:10px;pointer-events:none}
+.world-bottom span{padding:8px 10px;border-radius:9px;background:#0b1324dd;font-size:10px;color:var(--muted)}
+.move-controls{display:flex;gap:6px;pointer-events:auto}
+.move-controls button{width:42px;height:42px;background:#1b2d49ee;color:white;border:1px solid #45618b;border-radius:12px;font-size:18px;touch-action:none}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+.card{padding:13px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;min-width:0}
+.card h3{font-size:12px;margin:0 0 10px}
+.card p{font-size:11px;line-height:1.9;color:var(--muted);margin:5px 0}
+.card strong{color:var(--text)}
+.field{width:100%;padding:11px;background:#0a1221;border:1px solid var(--line);color:var(--text);border-radius:10px;font-size:12px}
+textarea.field{min-height:95px;resize:vertical}
+.stack{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:7px}
+.row>*{min-width:0}
+.result{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;line-height:2;color:#d5e1f5}
+.report-item{padding:10px 0;border-bottom:1px solid var(--line)}
+.report-item:last-child{border-bottom:0}
+.report-item b{font-size:11px}
+.report-item p{white-space:pre-wrap;overflow-wrap:anywhere}
+footer{padding:12px;text-align:center;color:var(--muted);font-size:10px;line-height:1.8;border-top:1px solid var(--line)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#20375b;color:white;border:1px solid #47669a;padding:11px 16px;border-radius:12px;font-size:12px;z-index:20;display:none;max-width:90vw}
+.hidden{display:none!important}
+.mobile-menu{display:none}
+@media(max-width:800px){
+ .layout{grid-template-columns:1fr;padding:8px;gap:8px}
+ .sidebar{order:2}
+ .mainpanel{order:1}
+ #world{min-height:55dvh;min-height:55svh}
+ .agent-list{display:grid;grid-template-columns:1fr 1fr;max-height:300px}
+ .bottom-grid{grid-template-columns:1fr}
+ header{padding:12px}
+ h1{font-size:14px}
+ .status{font-size:10px}
+ .hint{max-width:185px}
+}
+@media(min-width:801px){.sidebar{max-height:calc(100dvh - 100px);overflow:auto}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">
+    <div class="logo">⌘</div>
+    <div><h1>مرکز تحقیقات هوش مصنوعی</h1><div class="subtitle">AI RESEARCH COMPANY · نسخه آزمایشی</div></div>
+  </div>
+  <div class="status">● محیط آماده</div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+  <div>
+    <div class="section-title">نمای کلی شرکت</div>
+    <div class="stats">
+      <div class="stat"><b>۱۲</b><span>عضو تیم</span></div>
+      <div class="stat"><b id="reportCount">۰</b><span>گزارش ذخیره‌شده</span></div>
+      <div class="stat"><b id="taskCount">۰</b><span>پژوهش ثبت‌شده</span></div>
+      <div class="stat"><b id="activeCount">۱۲</b><span>عامل نمایشی</span></div>
+    </div>
+    <div class="progress"><i id="progressBar"></i></div>
+    <p class="subtitle" id="progressLabel">هنوز پژوهشی ثبت نشده است.</p>
+  </div>
+
+  <div>
+    <div class="section-title">بخش‌های شرکت</div>
+    <div class="nav">
+      <button class="active" data-tab="overview">🏢 محیط شرکت</button>
+      <button data-tab="research">🔬 پژوهش</button>
+      <button data-tab="reports">📚 گزارش‌ها</button>
+      <button data-tab="settings">⚙️ تنظیمات</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-title">۱۲ کارمند و تخصص آن‌ها</div>
+    <div class="agent-list" id="agentList"></div>
+  </div>
+  <button class="secondary" id="exportButton">⬇️ دریافت نسخه پشتیبان گزارش‌ها</button>
+</aside>
+
+<main class="mainpanel">
+  <div class="toolbar">
+    <strong id="viewTitle">🏢 دفتر سه‌بعدی شرکت</strong>
+    <button id="rotateButton" class="active">⟳ چرخش خودکار</button>
+    <button id="resetButton">بازگشت دوربین</button>
+    <button id="fullscreenButton">تمام‌صفحه</button>
+  </div>
+
+  <section id="world">
+    <canvas id="scene" aria-label="محیط سه‌بعدی شرکت؛ برای چرخش لمس کنید و برای حرکت از دکمه‌ها استفاده کنید"></canvas>
+    <div class="hint">🖐️ صفحه را بکش تا دوربین بچرخد<br>⬆️⬇️ حرکت · ⬅️➡️ جابه‌جایی<br>روی کارمند بزن تا انتخاب شود.</div>
+    <div class="world-bottom">
+      <span id="worldStatus">در حال آماده‌سازی محیط…</span>
+      <div class="move-controls">
+        <button data-move="forward" aria-label="حرکت به جلو">↑</button>
+        <button data-move="left" aria-label="حرکت به چپ">←</button>
+        <button data-move="back" aria-label="حرکت به عقب">↓</button>
+        <button data-move="right" aria-label="حرکت به راست">→</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="bottom-grid">
+    <section class="card" id="agentDetail">
+      <h3>👤 مشخصات کارمند انتخاب‌شده</h3>
+      <p>برای مشاهدهٔ وظیفه و تخصص، یکی از کارمندان را انتخاب کن.</p>
+    </section>
+    <section class="card" id="quickPanel">
+      <h3>🧪 شروع پژوهش جدید</h3>
+      <div class="stack">
+        <input class="field" id="quickQuestion" placeholder="موضوع تحقیق را بنویس…">
+        <button class="action" id="quickStart">ثبت موضوع پژوهش</button>
+        <p>این نسخه موضوع پژوهش را ذخیره می‌کند. برای تحقیق واقعی باید اتصال مدل هوش مصنوعی اضافه شود.</p>
+      </div>
+    </section>
+  </div>
+  <section class="card hidden" id="tabPanel" style="margin:0 12px 12px"></section>
+</main>
+</div>
+
+<footer>
+  نسخهٔ اولیهٔ قابل انتشار روی GitHub Pages · گزارش‌ها در مرورگر همین دستگاه ذخیره می‌شوند.<br>
+  کارمندان سه‌بعدی این نسخه شبیه‌سازی رابط کاربری هستند؛ اتصال واقعی به مدل‌های هوش مصنوعی هنوز پیکربندی نشده است.
+</footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js';
+
+const $ = id => document.getElementById(id);
+const employees = [
+ {name:'آرمان',role:'مدیر پژوهش',icon:'🧭',color:0x7297ff,task:'تقسیم وظایف، برنامه‌ریزی پژوهش و جمع‌بندی'},
+ {name:'نیلوفر',role:'پژوهشگر علوم',icon:'🔬',color:0x55d6be,task:'بررسی پرسش‌های علمی و طراحی فرضیه'},
+ {name:'کاوه',role:'متخصص فناوری',icon:'💻',color:0xb28cff,task:'تحلیل فناوری، نرم‌افزار و معماری سیستم'},
+ {name:'رها',role:'تحلیلگر داده',icon:'📊',color:0xffc76a,task:'ساختاردهی داده‌ها و تحلیل کمی'},
+ {name:'پارسا',role:'اقتصادپژوه',icon:'📈',color:0x64a5ff,task:'تحلیل اقتصادی و مقایسه سناریوها'},
+ {name:'هستی',role:'پژوهشگر تاریخ',icon:'📜',color:0xff8d9e,task:'مطالعه زمینه تاریخی و خط زمانی'},
+ {name:'سام',role:'راستی‌آزما',icon:'🛡️',color:0x7fe0a4,task:'بررسی ادعاها، شواهد و عدم قطعیت'},
+ {name:'مهسا',role:'متخصص زبان',icon:'📝',color:0xd9a0ff,task:'خلاصه‌سازی، نگارش و ویرایش گزارش'},
+ {name:'بردیا',role:'تحلیلگر سیاست',icon:'🌐',color:0x70d4ee,task:'تحلیل سیاست‌ها و پیامدهای اجتماعی'},
+ {name:'ترانه',role:'پژوهشگر زیست',icon:'🧬',color:0xffb078,task:'پژوهش زیست‌شناسی و سلامت عمومی'},
+ {name:'یاسین',role:'متخصص امنیت',icon:'🔐',color:0xa5b8ff,task:'ارزیابی ریسک، امنیت و حریم خصوصی'},
+ {name:'آوا',role:'هماهنگ‌کننده',icon:'🤝',color:0xffd970,task:'هماهنگی تیم و کنترل کیفیت خروجی'}
+];
+const defaultState = {reports:[],tasks:[],selected:0,rotation:true};
+let state;
+try { state = JSON.parse(localStorage.getItem('aiLabState')||'null') || defaultState; }
+catch { state = defaultState; }
+state.reports ||= []; state.tasks ||= []; state.selected ??= 0;
+let toastTimer;
+function notify(message){
+ const el=$('toast');el.textContent=message;el.style.display='block';
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.display='none',2800);
+}
+function save(){
+ try{localStorage.setItem('aiLabState',JSON.stringify(state));}
+ catch{notify('فضای ذخیره‌سازی در دسترس نیست؛ از گزارش‌ها نسخه پشتیبان بگیر.');}
+ updateStats();
+}
+function updateStats(){
+ $('reportCount').textContent=state.reports.length;
+ $('taskCount').textContent=state.tasks.length;
+ $('progressBar').style.width=Math.min(100,state.tasks.length*10)+'%';
+ $('progressLabel').textContent=state.tasks.length?`${state.tasks.length} موضوع پژوهشی ثبت شده است.`:'هنوز پژوهشی ثبت نشده است.';
+}
+function renderAgents(){
+ $('agentList').replaceChildren();
+ employees.forEach((e,i)=>{
+  const b=document.createElement('button');b.className='agent'+(state.selected===i?' selected':'');
+  b.innerHTML=`<span class="avatar">${e.icon}</span><span class="agent-info"><b>${e.name}</b><small>${e.role}</small></span><span class="dot"></span>`;
+  b.addEventListener('click',()=>selectEmployee(i));$('agentList').append(b);
+ });
+}
+function selectEmployee(i){
+ state.selected=i;renderAgents();const e=employees[i];
+ $('agentDetail').replaceChildren();
+ const title=document.createElement('h3');title.textContent=`${e.icon} ${e.name} — ${e.role}`;
+ const task=document.createElement('p');task.textContent='وظیفه: '+e.task;
+ const status=document.createElement('p');status.textContent='وضعیت: حاضر در محیط نمایشی';
+ const note=document.createElement('p');note.textContent='توجه: این عامل هنوز به مدل هوش مصنوعی متصل نیست.';
+ $('agentDetail').append(title,task,status,note);save();
+ if(agents3d[i]){agents3d.forEach((a,j)=>a.scale.setScalar(j===i?1.16:1));}
+}
+function registerTask(question){
+ question=String(question||'').trim();
+ if(!question){notify('اول موضوع پژوهش را بنویس.');return;}
+ const task={id:Date.now(),question,created:new Date().toISOString(),status:'ثبت‌شده'};
+ state.tasks.unshift(task);save();
+ $('quickQuestion').value='';notify('موضوع پژوهش ثبت شد.');
+ showResearchResult(task);
+}
+function showResearchResult(task){
+ $('tabPanel').classList.remove('hidden');
+ $('tabPanel').replaceChildren();
+ const h=document.createElement('h3');h.textContent='🔬 پژوهش ثبت‌شده';
+ const p=document.createElement('p');p.textContent='موضوع: '+task.question;
+ const note=document.createElement('p');note.textContent='وضعیت: موضوع ذخیره شد؛ هنوز جست‌وجوی اینترنتی یا تولید پاسخ با مدل هوش مصنوعی انجام نشده است.';
+ const btn=document.createElement('button');btn.className='secondary';btn.textContent='ساخت پیش‌نویس پرسش‌های تحقیق';
+ btn.addEventListener('click',()=>makeDraft(task));
+ $('tabPanel').append(h,p,note,btn);
+}
+function makeDraft(task){
+ const draft=`موضوع پژوهش: ${task.question}
+
+پرسش‌های پیشنهادی:
+۱. پرسش اصلی دقیقاً چیست؟
+۲. چه شواهد و منابع معتبری برای پاسخ لازم است؟
+۳. چه دیدگاه‌های متفاوتی وجود دارد؟
+۴. چه داده‌هایی ممکن است نتیجه را تغییر دهند؟
+۵. محدودیت‌ها و موارد نامطمئن کدام‌اند؟
+
+این متن پیش‌نویس است و هنوز توسط مدل هوش مصنوعی یا منابع بیرونی بررسی نشده است.`;
+ const report={id:Date.now(),title:task.question,body:draft,created:new Date().toISOString()};
+ state.reports.unshift(report);save();showReports();notify('پیش‌نویس به گزارش‌ها اضافه شد.');
+}
+function showReports(){
+ $('viewTitle').textContent='📚 گزارش‌های پژوهشی';
+ const panel=$('tabPanel');panel.classList.remove('hidden');panel.replaceChildren();
+ const h=document.createElement('h3');h.textContent='گزارش‌های ذخیره‌شده';
+ panel.append(h);
+ if(!state.reports.length){const p=document.createElement('p');p.textContent='هنوز گزارشی نداریم. از بخش پژوهش یک پیش‌نویس بساز.';panel.append(p);return;}
+ state.reports.forEach(r=>{
+  const wrap=document.createElement('div');wrap.className='report-item';
+  const b=document.createElement('b');b.textContent=r.title;
+  const p=document.createElement('p');p.textContent=r.body;
+  const button=document.createElement('button');button.className='secondary';button.textContent='نمایش متن گزارش';
+  button.addEventListener('click',()=>{p.classList.toggle('hidden');});
+  wrap.append(b,button,p);panel.append(wrap);
+ });
+}
+function showSettings(){
+ $('viewTitle').textContent='⚙️ تنظیمات';
+ const panel=$('tabPanel');panel.classList.remove('hidden');panel.replaceChildren();
+ const h=document.createElement('h3');h.textContent='تنظیمات محیط';
+ const p=document.createElement('p');p.textContent='اطلاعات این نسخه در localStorage مرورگر ذخیره می‌شود. پاک کردن داده‌های مرورگر ممکن است آن را حذف کند.';
+ const clear=document.createElement('button');clear.className='secondary';clear.textContent='پاک کردن گزارش‌ها و پژوهش‌ها';
+ clear.addEventListener('click',()=>{
+  if(confirm('تمام گزارش‌ها و موضوع‌های ذخیره‌شده پاک شوند؟')){
+   state.reports=[];state.tasks=[];save();showSettings();notify('گزارش‌ها پاک شدند.');
+  }
+ });
+ const help=document.createElement('p');help.textContent='برای اتصال واقعی کارمندان، در مرحله بعد باید بک‌اند امن و ارائه‌دهنده مدل هوش مصنوعی پیکربندی شود. کلید API را داخل این فایل قرار نده.';
+ panel.append(h,p,clear,help);
+}
+function showResearchTab(){
+ $('viewTitle').textContent='🔬 پژوهش';
+ const panel=$('tabPanel');panel.classList.remove('hidden');panel.replaceChildren();
+ const h=document.createElement('h3');h.textContent='مرکز ثبت پژوهش';
+ const form=document.createElement('form');form.className='stack';
+ const input=document.createElement('input');input.className='field';input.placeholder='مثلاً: کاربرد هوش مصنوعی در آموزش';input.required=true;
+ const btn=document.createElement('button');btn.className='action';btn.textContent='ثبت پژوهش';
+ form.append(input,btn);form.addEventListener('submit',e=>{e.preventDefault();registerTask(input.value);});
+ const p=document.createElement('p');p.textContent=`موضوع‌های ثبت‌شده: ${state.tasks.length}`;
+ panel.append(h,form,p);
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));
+ if(b.dataset.tab==='reports')showReports();
+ else if(b.dataset.tab==='settings')showSettings();
+ else if(b.dataset.tab==='research')showResearchTab();
+ else{$('viewTitle').textContent='🏢 دفتر سه‌بعدی شرکت';$('tabPanel').classList.add('hidden');}
+}));
+$('quickStart').addEventListener('click',()=>registerTask($('quickQuestion').value));
+$('exportButton').addEventListener('click',()=>{
+ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);const a=document.createElement('a');
+ a.href=url;a.download='ai-research-backup.json';a.click();URL.revokeObjectURL(url);
+});
+$('rotateButton').addEventListener('click',()=>{
+ state.rotation=!state.rotation;$('rotateButton').classList.toggle('active',state.rotation);save();
+});
+$('resetButton').addEventListener('click',()=>{camera.position.set(0,8,15);camera.lookAt(0,0,0);cameraYaw=0;});
+$('fullscreenButton').addEventListener('click',async()=>{
+ try{if(!document.fullscreenElement)await $('world').requestFullscreen();else await document.exitFullscreen();}
+ catch{notify('حالت تمام‌صفحه در این مرورگر پشتیبانی نشد.');}
+});
+
+// محیط سه‌بعدی
+const canvas=$('scene');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x0a1020);scene.fog=new THREE.Fog(0x0a1020,24,55);
+const camera=new THREE.PerspectiveCamera(55,1,.1,100);
+camera.position.set(0,8,15);
+scene.add(new THREE.HemisphereLight(0xbcd8ff,0x172238,2));
+const sun=new THREE.DirectionalLight(0xffffff,2.5);sun.position.set(-7,13,8);sun.castShadow=true;scene.add(sun);
+const floorMat=new THREE.MeshStandardMaterial({color:0x18243a,roughness:.8});
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(34,26),floorMat);floor.rotation.x=-Math.PI/2;floor.position.y=-.08;floor.receiveShadow=true;scene.add(floor);
+const grid=new THREE.GridHelper(34,34,0x3b6092,0x263b59);grid.position.y=-.055;scene.add(grid);
+const room=new THREE.Group();scene.add(room);
+function box(parent,x,y,z,sx,sy,sz,color,emissive=0){
+ const mesh=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),new THREE.MeshStandardMaterial({color,roughness:.65,emissive,emissiveIntensity:.25}));
+ mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+}
+function cylinder(parent,x,y,z,r1,r2,h,color){
+ const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,16),new THREE.MeshStandardMaterial({color,roughness:.6}));
+ m.position.set(x,y,z);m.castShadow=true;parent.add(m);return m;
+}
+// دیوارهای کوتاه و میز مرکزی
+box(room,0,1.3,-10,22,2.6,.25,0x243651);
+box(room,-11,1.2,0,.25,2.4,20,0x243651);
+box(room,11,1.2,0,.25,2.4,20,0x243651);
+box(room,0,.12,0,6,.25,3,0x344c6e);
+box(room,0,.38,0,5.7,.25,2.7,0x526c94);
+for(let i=0;i<4;i++){
+ const x=-3.5+i*2.3;
+ box(room,x,.25,-2.8,1.7,.3,1,0x344966);
+ box(room,x,.65,-2.8,1.3,.55,.08,0x101b2d,0x163b6a);
+ box(room,x,.9,-2.8,.95,.06,.05,0x6b9eff,0x4e8bff);
+}
+// میزها و چراغ‌های تزئینی
+const agents3d=[];
+employees.forEach((e,i)=>{
+ const col=i%4,row=Math.floor(i/4),x=(col-1.5)*4.6,z=(row-1)*5.2;
+ const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
+ box(g,0,.65,0,1.8,.18,1.15,0x344865);
+ box(g,0,1.12,-.2,.85,.65,.08,0x0d1728,0x153b66);
+ box(g,0,1.13,-.15,.65,.4,.025,e.color,e.color);
+ cylinder(g,-.58,.32,.35,.08,.08,.55,0x8295b4);
+ cylinder(g,.58,.32,.35,.08,.08,.55,0x8295b4);
+ const body=cylinder(g,0,1.75,.15,.32,.4,.85,e.color);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.28,20,16),new THREE.MeshStandardMaterial({color:0xf0c5a7,roughness:.75}));
+ head.position.set(0,2.35,.15);head.castShadow=true;g.add(head);
+ const hair=new THREE.Mesh(new THREE.SphereGeometry(.29,16,12,0,Math.PI*2,0,Math.PI*.52),new THREE.MeshStandardMaterial({color:0x253047}));
+ hair.position.set(0,2.43,.15);g.add(hair);
+ const badge=box(g,0,1.8,.47,.19,.12,.06,0xffffff);
+ const light=new THREE.PointLight(e.color,1.5,3);light.position.set(0,2.7,.3);g.add(light);
+ g.userData={employee:i};agents3d.push(g);
+});
+// نشانه‌های نورانی اطراف دفتر
+for(let i=0;i<12;i++){
+ const a=i/12*Math.PI*2;
+ const light=new THREE.PointLight(i%2?0x4d83ff:0x4dffc0,.8,5);
+ light.position.set(Math.cos(a)*9,2,Math.sin(a)*7);scene.add(light);
+}
+const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
+let cameraYaw=0,dragging=false,lastX=0,lastY=0;
+function resize(){
+ const r=$('world').getBoundingClientRect();if(!r.width||!r.height)return;
+ renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();
+}
+window.addEventListener('resize',resize);resize();
+canvas.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture?.(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{
+ if(!dragging)return;
+ cameraYaw-=(e.clientX-lastX)*.006;
+ camera.position.y=Math.max(3,Math.min(13,camera.position.y+(e.clientY-lastY)*.025));
+ lastX=e.clientX;lastY=e.clientY;
+});
+canvas.addEventListener('pointerup',e=>{
+ if(!dragging)return;dragging=false;
+ const rect=canvas.getBoundingClientRect();
+ pointer.x=((e.clientX-rect.left)/rect.width)*2-1;
+ pointer.y=-((e.clientY-rect.top)/rect.height)*2+1;
+ raycaster.setFromCamera(pointer,camera);
+ const hits=raycaster.intersectObjects(agents3d,true);
+ if(hits.length){
+  let obj=hits[0].object;
+  while(obj.parent&&!Number.isInteger(obj.userData.employee))obj=obj.parent;
+  if(Number.isInteger(obj.userData.employee))selectEmployee(obj.userData.employee);
+ }
+});
+canvas.addEventListener('pointercancel',()=>dragging=false);
+canvas.addEventListener('wheel',e=>{camera.position.multiplyScalar(e.deltaY>0?1.06:.94);camera.position.y=Math.max(3,Math.min(18,camera.position.y));},{passive:true});
+const movement={forward:false,back:false,left:false,right:false};
+document.querySelectorAll('[data-move]').forEach(btn=>{
+ const key=btn.dataset.move;
+ const on=ev=>{ev.preventDefault();movement[key]=true;};
+ const off=()=>movement[key]=false;
+ btn.addEventListener('pointerdown',on);btn.addEventListener('pointerup',off);
+ btn.addEventListener('pointerleave',off);btn.addEventListener('pointercancel',off);
+});
+window.addEventListener('keydown',e=>{
+ const k=e.key.toLowerCase();
+ if(k==='w'||k==='arrowup')movement.forward=true;
+ if(k==='s'||k==='arrowdown')movement.back=true;
+ if(k==='a'||k==='arrowleft')movement.left=true;
+ if(k==='d'||k==='arrowright')movement.right=true;
+});
+window.addEventListener('keyup',e=>{
+ const k=e.key.toLowerCase();
+ if(k==='w'||k==='arrowup')movement.forward=false;
+ if(k==='s'||k==='arrowdown')movement.back=false;
+ if(k==='a'||k==='arrowleft')movement.left=false;
+ if(k==='d'||k==='arrowright')movement.right=false;
+});
+let lastTime=0;
+function animate(time){
+ requestAnimationFrame(animate);
+ const dt=Math.min((time-lastTime)/1000||0,.05);lastTime=time;
+ if(state.rotation&&!dragging)cameraYaw+=dt*.07;
+ const speed=dt*5;
+ const forward=(movement.forward?1:0)-(movement.back?1:0);
+ const side=(movement.right?1:0)-(movement.left?1:0);
+ if(forward||side){
+  camera.position.x+=Math.sin(cameraYaw)*forward*speed+Math.cos(cameraYaw)*side*speed;
+  camera.position.z-=Math.cos(cameraYaw)*forward*speed-Math.sin(cameraYaw)*side*speed;
+ }
+ const distance=Math.max(8,Math.sqrt(camera.position.x**2+camera.position.z**2));
+ const target=new THREE.Vector3(Math.sin(cameraYaw)*distance*.15,0,0);
+ camera.lookAt(target);
+ agents3d.forEach((g,i)=>{g.position.y=Math.sin(time*.0015+i)*.035;});
+ renderer.render(scene,camera);
+}
+requestAnimationFrame(animate);
+$('worldStatus').textContent='محیط سه‌بعدی آماده است';
+renderAgents();updateStats();selectEmployee(state.selected);
+</script>
+</body>
+</html>
